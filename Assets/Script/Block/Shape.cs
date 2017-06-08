@@ -91,6 +91,15 @@ public class Shape:MonoBehaviour,ISerializationCallbackReceiver
     /////////////////////////////////////////////////////////////////////////////////////////////
     [SerializeField]
     public ShapeRenderInfo m_RenderInfo=new ShapeRenderInfo();
+    [SerializeField]
+    public WorldSpaceType SpaceType;
+    public ShapeIndex Index;
+    
+    public void SetPoistion(Vector3 pos)
+    {
+        this.transform.position = pos;
+        SpaceType = WorldMap.GetShapeSpaceType(this);
+    }
     public void OnBeforeSerialize()
     {
     }
