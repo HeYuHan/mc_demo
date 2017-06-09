@@ -1,19 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-public class PerlinNoise
+[Serializable]
+public class PerlinNoise:SerializableObject
 {
     public static float Noise(int x,int random)
     {
+        x *= random;
         x = (x << 13) ^ x;
-        return (1.0f - ((x * (x * x * 15731 + 789221) + 1376312589-random) & 0x7fffffff) / (1073741824.0f+random));
+        return (1.0f - ((x * (x * x * 15731 + 789221) + 1376312589) & 0x7fffffff) / (1073741824.0f));
     }
     public static float Noise(int x, int y,int random)
     {
         x += y * 32;
-        x = (x << 13) ^ x;
-        return (1.0f - ((x * (x * x * 15731 + 789221) + 1376312589 - random) & 0x7fffffff) / (1073741824.0f + random));
+        return Noise(x, random);
     }
     public static float LinearInterpolate(float from,float to,float d)
     {
@@ -33,21 +35,21 @@ public class PerlinNoise
         float S = from2;
         return P * Mathf.Pow(d, 3) + Q * Mathf.Pow(d, 2) + R * d + S;
     }
-    
-
-
+    [SerializeField]
     int m_RandomValue;
-    float m_Persistence;
-    int m_Octaves;
+    [SerializeField]
+    float m_Persistence=0.25f;
+    [SerializeField]
+    int m_Octaves=2;
     public PerlinNoise(float per, int oct)
     {
         m_Persistence = per;
         m_Octaves = oct;
-        m_RandomValue = Random.Range(-100, 100);
+        m_RandomValue = new System.Random().Next(-100, 100);
     }
     public PerlinNoise()
     {
-        m_RandomValue = Random.Range(-100, 100);
+        m_RandomValue = new System.Random().Next(-100, 100);
     }
     public void SetPersistence(float per)
     {
@@ -117,6 +119,4 @@ public class PerlinNoise
         float i2 = CosineInterpolate(v3, v4, d_x);
         return CosineInterpolate(i1, i2, d_y);
     }
-
-
 }

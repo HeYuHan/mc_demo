@@ -85,12 +85,15 @@
     <Compile Include="Assets\Script\Block\ShapeInfo.cs" />
     <Compile Include="Assets\Script\Block\ShapeRenderInfo.cs" />
     <Compile Include="Assets\Script\Block\WorldMap.cs" />
+    <Compile Include="Assets\Script\Common\BaseObject.cs" />
     <Compile Include="Assets\Script\Common\ColorPicker.cs" />
+    <Compile Include="Assets\Script\Common\GameObjectPool.cs" />
     <Compile Include="Assets\Script\Common\ICommon.cs" />
     <Compile Include="Assets\Script\Common\Item.cs" />
     <Compile Include="Assets\Script\Common\JTexture.cs" />
     <Compile Include="Assets\Script\Common\JsonVector.cs" />
     <Compile Include="Assets\Script\Common\PerlinNoise.cs" />
+    <Compile Include="Assets\Script\Common\PoolObject.cs" />
     <Compile Include="Assets\Test.cs" />
   </ItemGroup>
   <ItemGroup>

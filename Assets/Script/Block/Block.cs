@@ -28,10 +28,10 @@ public class BlockManager
         }
         for(int i=0;i<color_mats.Count;i++)
         {
-            if(info.Color==color_mats[i].color)
-            {
-                return result;
-            }
+            //if(info.m_Color==color_mats[i].color)
+            //{
+            //    return result;
+            //}
         }
         switch (info.MatType)
         {

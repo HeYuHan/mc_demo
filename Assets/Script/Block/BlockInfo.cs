@@ -25,7 +25,8 @@ public class BlockInfo : IJson
     public BlockMatType MatType=BlockMatType.COLOR_MAP_ONLY;
     public Vector3 Position=Vector3.zero;
     public string TextureName=string.Empty;
-    public Color Color = Color.white;
+    [SerializeField]
+    Color m_Color = Color.white;
 
 
     public bool Deserialize(string json)

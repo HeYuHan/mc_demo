@@ -2,16 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class ShapeInfo : IJson
+[Serializable]
+public class ShapeInfo : SerializableObject
 {
-    public bool Deserialize(string json)
+    public ShapeIndex Index;
+    public WorldSpaceType SpaceType;
+    public int ResourceID;
+    Shape m_ShapeObject;
+    public Shape GetOrCreateShape()
     {
-        throw new NotImplementedException();
+        if(!m_ShapeObject)
+        {
+            m_ShapeObject=Shape.Pool.Pop();
+        }
+        return m_ShapeObject;
+    }
+    public void Clean()
+    {
+        if (m_ShapeObject)
+        {
+            Shape.Pool.Push(m_ShapeObject);
+            m_ShapeObject = null;
+        }
+    }
+    public void Apply()
+    {
+        if (m_ShapeObject) m_ShapeObject.Applay(this);
     }
 
-    public bool Serialize(out string json)
-    {
-        throw new NotImplementedException();
-    }
 }

@@ -5,6 +5,14 @@ public interface IJson
     bool Serialize(out string json);
     bool Deserialize(string json);
 }
+public interface IPool
+{
+    int GetPoolPosition();
+    void SetPoolPosition(int position);
+    void Reset();
+    void Recycle();
+    void Create();
+}
 [Serializable]
 public struct ShapeIndex
 {

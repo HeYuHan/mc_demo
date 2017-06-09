@@ -1,31 +1,65 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-public class MapBlock
+[Serializable]
+public class MapBlock:SerializableObject
 {
-    public const int BLOCK_LENGTH = 16;
-    public const int BLOCK_HEIGHT = 256;
-
-    public readonly ShapeIndex Index;
-    public readonly WorldSpaceType WorldSpaceType;
+    public const int BLOCK_SIZE = 16;
+    public const int BLOCK_HEIGHT = 8;
+    ShapeInfo[] m_Shapes;
+    public WorldSpaceType SpaceType { get { return m_SpaceType; }set { m_SpaceType = value; } }
+    public ShapeIndex Index { get { return m_Index; }set { m_Index = value; } }
+    [SerializeField]
+    List<ShapeInfo> m_ExportShapeList;
+    [SerializeField]
+    WorldSpaceType m_SpaceType;
+    [SerializeField]
+    ShapeIndex m_Index;
     public int Count { get; private set; }
-    private Shape[] m_Shapes;
-    public MapBlock(ShapeIndex index, WorldSpaceType type)
+    public override bool Init()
     {
-        Count = 0;
-        Index = index;
-        WorldSpaceType = type;
-        m_Shapes = new Shape[BLOCK_LENGTH * BLOCK_LENGTH * BLOCK_HEIGHT];
+        m_Shapes = new ShapeInfo[BLOCK_SIZE * BLOCK_SIZE * BLOCK_HEIGHT];
+        m_ExportShapeList = new List<ShapeInfo>();
+        return true;
+    }
+    public override bool Serialize(out string json)
+    {
+        m_ExportShapeList.Clear();
+        for(int i=0;i<m_Shapes.Length;i++)
+        {
+            if(m_Shapes[i]!=null)
+            {
+                m_ExportShapeList.Add(m_Shapes[i]);
+            }
+        }
+        bool result = base.Serialize(out json);
+        m_ExportShapeList.Clear();
+        return result;
+    }
+    public override bool Deserialize(string json)
+    {
+
+        bool result = Deserialize(json);
+        int len = m_ExportShapeList.Count;
+        
+        for (int i = 0; i < len; i++)
+        {
+            AddShape(m_ExportShapeList[i]);
+        }
+        Count = len;
+        m_ExportShapeList.Clear();
+        return result;
     }
     public int SwicthWorldIndexToBlock(ShapeIndex index)
     {
         int data_start = index.z % BLOCK_HEIGHT;
         int cell_start = index.x;
         int row_start = index.y;
-        return BLOCK_LENGTH * BLOCK_LENGTH * data_start + row_start * BLOCK_LENGTH + cell_start;
+        return BLOCK_SIZE * BLOCK_SIZE * data_start + row_start * BLOCK_SIZE + cell_start;
     }
-    public void AddShape(Shape shape)
+    public void AddShape(ShapeInfo shape)
     {
         if (shape == null) return;
         int index = SwicthWorldIndexToBlock(shape.Index);
@@ -53,12 +87,12 @@ public class MapBlock
         }
         return false;
     }
-    public bool RemoveShape(Shape shape)
+    public bool RemoveShape(ShapeInfo shape)
     {
         if (shape == null) return false;
         return RemoveShape(shape.Index);
     }
-    public Shape GetShape(ShapeIndex index)
+    public ShapeInfo GetShape(ShapeIndex index)
     {
         int i = SwicthWorldIndexToBlock(index);
         if (i > 0)
@@ -67,4 +101,18 @@ public class MapBlock
         }
         return null;
     }
+    public void Clean()
+    {
+        for (int i = 0; i < m_Shapes.Length; i++)
+        {
+            if (m_Shapes[i] != null)
+            {
+                m_Shapes[i].Clean();
+            }
+            m_Shapes[i] = null;
+            
+        }
+        Count = 0;
+    }
+    
 }

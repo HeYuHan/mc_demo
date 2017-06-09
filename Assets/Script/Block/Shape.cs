@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class Shape:MonoBehaviour,ISerializationCallbackReceiver
+public class Shape:PoolObject
 {
 
     public static readonly Vector3[] CUBE_VECTOR_DATA = new Vector3[]
@@ -89,28 +89,42 @@ public class Shape:MonoBehaviour,ISerializationCallbackReceiver
         return PLANE_MESH;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
-    [SerializeField]
-    public ShapeRenderInfo m_RenderInfo=new ShapeRenderInfo();
-    [SerializeField]
-    public WorldSpaceType SpaceType;
-    public ShapeIndex Index;
-    
+    static GameObjectPool<Shape> m_ShapePool;
+    MeshFilter m_MeshFilter;
+    MeshRenderer m_MeshRenderer;
+    public static GameObjectPool<Shape> Pool
+    {
+        get
+        {
+            if(m_ShapePool==null)
+            {
+                m_ShapePool = new GameObjectPool<Shape>();
+                m_ShapePool.Init();
+            }
+            return m_ShapePool;
+        }
+    }
     public void SetPoistion(Vector3 pos)
     {
-        this.transform.position = pos;
-        SpaceType = WorldMap.GetShapeSpaceType(this);
     }
-    public void OnBeforeSerialize()
-    {
-    }
-
-    public void OnAfterDeserialize()
-    {
-        
-    }
-    private void OnDestroy()
+    public void Applay(ShapeInfo info)
     {
 
+    }
+
+    public override void Reset()
+    {
+        this.gameObject.SetActive(true);
+    }
+
+    public override void Recycle()
+    {
+        this.gameObject.SetActive(false);
+    }
+    public override void Create()
+    {
+        m_MeshFilter = gameObject.SafeAddComponent<MeshFilter>();
+        m_MeshRenderer = gameObject.SafeAddComponent<MeshRenderer>();
     }
 }
 
