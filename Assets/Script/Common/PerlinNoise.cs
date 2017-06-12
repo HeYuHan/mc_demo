@@ -37,10 +37,13 @@ public class PerlinNoise:SerializableObject
     }
     [SerializeField]
     int m_RandomValue;
-    [SerializeField]
-    float m_Persistence=0.25f;
+    [SerializeField][Range(0,1)]
+    float m_Persistence=0.5f;
     [SerializeField]
     int m_Octaves=2;
+    [SerializeField]
+    [Range(0, 1)]
+    float m_Delta = 0.2f;
     public PerlinNoise(float per, int oct)
     {
         m_Persistence = per;
@@ -61,6 +64,7 @@ public class PerlinNoise:SerializableObject
     }
     public float PerlinNoise1D(float x)
     {
+        x *= m_Delta;
         float result = 0;
         float p = m_Persistence;
         float n = m_Octaves;
@@ -74,6 +78,8 @@ public class PerlinNoise:SerializableObject
     }
     public float PerlinNoise2D(float x,float y)
     {
+        x *= m_Delta;
+        y *= m_Delta;
         float result = 0;
         float p = m_Persistence;
         float n = m_Octaves;

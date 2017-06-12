@@ -15,14 +15,34 @@ public class SerializableObject : BaseObject, IJson
 {
     public virtual bool Deserialize(string json)
     {
+        BeginImport();
         JsonUtility.FromJsonOverwrite(json, this);
+        EndImport();
         return true;
     }
 
     public virtual bool Serialize(out string json)
     {
-        json = JsonUtility.ToJson(this, true);
+        BeginExport();
+        json = JsonUtility.ToJson(this, false);
+        EndExport();
         return !string.IsNullOrEmpty(json);
+    }
+    public virtual void BeginExport()
+    {
+
+    }
+    public virtual void EndExport()
+    {
+
+    }
+    public virtual void BeginImport()
+    {
+
+    }
+    public virtual void EndImport()
+    {
+
     }
 }
 

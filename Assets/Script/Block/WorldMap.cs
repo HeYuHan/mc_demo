@@ -27,10 +27,49 @@ public class WorldMap:SerializableObject
     PerlinNoise m_PerlinNoise;
     [SerializeField]
     List<MapBlock> m_ExportMapBlockList;
+    [SerializeField]
+    int m_MapHeight = 10;
+    [SerializeField]
+    int m_MapSize = 20;
+    
     public WorldMap()
     {
         m_PerlinNoise = new PerlinNoise();
         m_ExportMapBlockList = new List<MapBlock>();
+    }
+    public void InitMap()
+    {
+        for(int x=0;x< m_MapSize; x++)
+        {
+            for(int z=0;z< m_MapSize; z++)
+            {
+                int y= GetShapeHeight(x, z);
+                var shape_info = new ShapeInfo();
+                shape_info.SpaceType = GetShapeSpaceType(new Vector3(x, y, z));
+                shape_info.Index.x = x;
+                shape_info.Index.y = y;
+                shape_info.Index.z = z;
+                shape_info.Init();
+                shape_info.Apply();
+                AddShapeInfo(shape_info);
+
+            }
+        }
+    }
+    public int GetShapeHeight(int x,int z)
+    {
+        return Mathf.RoundToInt((m_PerlinNoise.PerlinNoise2D(x, z) * m_MapHeight))+m_MapHeight;
+    }
+    public ShapeInfo GetMapInfo(int x,int z)
+    {
+        int y = GetShapeHeight(x,z);
+        var shape_info = new ShapeInfo();
+        shape_info.SpaceType = GetShapeSpaceType(new Vector3(x, y, z));
+        shape_info.Index.x = x;
+        shape_info.Index.y = y;
+        shape_info.Index.z = z;
+        
+        return shape_info;
     }
     private void CleanBlock()
     {
@@ -44,35 +83,40 @@ public class WorldMap:SerializableObject
         }
  
     }
-    private void ExportBlock()
+    public override void BeginExport()
     {
-        for(int i=0;i< SPACE_COUNT; i++)
+        for (int i = 0; i < SPACE_COUNT; i++)
         {
-            for(int j=0;j<m_Blocks[i].Length;j++)
+            for (int j = 0; j < m_Blocks[i].Length; j++)
             {
-                if (m_Blocks[i][j] != null) m_ExportMapBlockList.Add(m_Blocks[i][j]);
+                if (m_Blocks[i][j] != null)
+                {
+                    m_Blocks[i][j].BeginExport();
+                    m_ExportMapBlockList.Add(m_Blocks[i][j]);
+                }
             }
         }
     }
-    public override bool Serialize(out string json)
+    public override void EndExport()
     {
+        for (int i=0;i<m_ExportMapBlockList.Count;i++)
+        {
+            m_ExportMapBlockList[i].EndExport();
+        }
         m_ExportMapBlockList.Clear();
-        ExportBlock();
-        bool result = base.Serialize(out json);
-        m_ExportMapBlockList.Clear();
-        return result;
     }
-    public override bool Deserialize(string json)
+    public override void BeginImport()
     {
         Init();
-        bool result = base.Deserialize(json);
+    }
+    public override void EndImport()
+    {
         int len = m_ExportMapBlockList.Count;
-        for(int i=0;i<len;i++)
+        for (int i = 0; i < len; i++)
         {
             SetBlock(m_ExportMapBlockList[i]);
         }
         m_ExportMapBlockList.Clear();
-        return result;
     }
     public override bool Init()
     {
@@ -84,10 +128,8 @@ public class WorldMap:SerializableObject
         }
         return true;
     }
-    public static WorldSpaceType GetShapeSpaceType(Shape shape)
+    public static WorldSpaceType GetShapeSpaceType(Vector3 pos)
     {
-        if (shape == null) return WorldSpaceType.NONE;
-        Vector3 pos = shape.transform.position;
         //up
         if (pos.y>=0)
         {
@@ -186,27 +228,33 @@ public class WorldMap:SerializableObject
         if(block_array!=null)
         {
             int array_index = GetBlockArrayIndex(block_index);
-            if (block_array.Length< array_index)
+            if (block_array.Length<= array_index)
             {
-                int len = (block_index.z + EXPAND_BLOCK_SIZE) * BLOCKMAP_SIZE * BLOCKMAP_SIZE;
+                int len = (block_index.z+EXPAND_BLOCK_SIZE) * BLOCKMAP_SIZE * BLOCKMAP_SIZE;
                 MapBlock[] bs = new MapBlock[len];
                 Array.Copy(block_array, bs, block_array.Length);
                 SetMapBlocks(type, bs);
                 block_array = bs;
+            }
+
+            block = block_array[array_index];
+            if (block==null)
+            {
                 block = new MapBlock();
                 block.SpaceType = type;
                 block.Index = block_index;
+                block.Init();
                 block_array[array_index] = block;
             }
-            block = block_array[array_index];
+            
         }
         return block;
     }
     public int GetBlockArrayIndex(ShapeIndex block_index)
     {
-        int z = block_index.z * BLOCKMAP_SIZE * BLOCKMAP_SIZE;
-        int cell = block_index.x;
-        int row = block_index.y * BLOCKMAP_SIZE;
+        int z = block_index.y * BLOCKMAP_SIZE * BLOCKMAP_SIZE;
+        int cell = block_index.z;
+        int row = block_index.x * BLOCKMAP_SIZE;
         return z + row + cell;
     }
     public MapBlock GetMapBlock(WorldSpaceType type,ShapeIndex index)
@@ -224,9 +272,9 @@ public class WorldMap:SerializableObject
     }
     public ShapeIndex ShapeIndexToBlockIndex(ShapeIndex index)
     {
-        index.x = (index.x + 1) / MapBlock.BLOCK_SIZE;
-        index.y = (index.y + 1) / MapBlock.BLOCK_SIZE;
-        index.z = (index.z + 1) / MapBlock.BLOCK_HEIGHT;
+        index.x = (Mathf.Abs(index.x)) / MapBlock.BLOCK_SIZE;
+        index.z = (Mathf.Abs(index.z)) / MapBlock.BLOCK_SIZE;
+        index.y = (Mathf.Abs(index.y)) / MapBlock.BLOCK_HEIGHT;
         return index;
     }
     public MapBlock GetMapBlock(ShapeInfo info)
@@ -246,5 +294,17 @@ public class WorldMap:SerializableObject
     public void Clean()
     {
         CleanBlock();
+    }
+    public void UpdateAllBlock()
+    {
+
+        for (int i = 0; i < SPACE_COUNT; i++)
+        {
+            for (int j = 0; j < m_Blocks[i].Length; j++)
+            {
+                if (m_Blocks[i][j] != null) m_Blocks[i][j].UpdateIndexByNoise(m_PerlinNoise,m_MapHeight);
+            }
+        }
+
     }
 }

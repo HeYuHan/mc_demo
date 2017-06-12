@@ -89,29 +89,83 @@ public class Shape:PoolObject
         return PLANE_MESH;
     }
     /////////////////////////////////////////////////////////////////////////////////////////////
+    public static Shape Create()
+    {
+        GameObject go = new GameObject("Shape");
+        return go.SafeAddComponent<Shape>();
+    }
+    /////////////////////////////////////////////////////////////////////////////////////////////
     static GameObjectPool<Shape> m_ShapePool;
     MeshFilter m_MeshFilter;
     MeshRenderer m_MeshRenderer;
+    [SerializeField]
+    ShapeInfo m_ShapeInfo;
     public static GameObjectPool<Shape> Pool
     {
         get
         {
             if(m_ShapePool==null)
             {
-                m_ShapePool = new GameObjectPool<Shape>();
+                m_ShapePool = new GameObjectPool<Shape>(Create);
                 m_ShapePool.Init();
             }
             return m_ShapePool;
         }
+    }
+
+    private void Awake()
+    {
+        m_MeshFilter = gameObject.SafeAddComponent<MeshFilter>();
+        m_MeshRenderer = gameObject.SafeAddComponent<MeshRenderer>();
     }
     public void SetPoistion(Vector3 pos)
     {
     }
     public void Applay(ShapeInfo info)
     {
+        m_ShapeInfo = info;
+        UpdateMesh(info.MeshType);
+        UpdatePosition(info.Index);
+        m_MeshRenderer.sharedMaterial = Test.mat;
+    }
+    public void UpdateColorMap(int resourceID)
+    {
 
     }
+    public void UpdateMaskMap(int resourceID)
+    {
 
+    }
+    public void UpdateMaterial(ShapeMaterialType type)
+    {
+        switch(type)
+        {
+            case ShapeMaterialType.COLOR_MAP_ONLY:
+                break;
+            case ShapeMaterialType.MASK_COLOR_MAP:
+                break;
+        }
+    }
+    public void UpdatePosition(ShapeIndex index)
+    {
+        this.transform.position = index;
+    }
+    public void UpdateMesh(ShapeMeshType type)
+    {
+        switch(type)
+        {
+            case ShapeMeshType.PLANE:
+                m_MeshFilter.sharedMesh = GetPlaneMesh();
+                break;
+            case ShapeMeshType.CBUE:
+                m_MeshFilter.sharedMesh = GetCubeMesh();
+                break;
+            default:
+                m_MeshFilter.sharedMesh = null;
+                break;
+        }
+
+    }
     public override void Reset()
     {
         this.gameObject.SetActive(true);
@@ -120,11 +174,6 @@ public class Shape:PoolObject
     public override void Recycle()
     {
         this.gameObject.SetActive(false);
-    }
-    public override void Create()
-    {
-        m_MeshFilter = gameObject.SafeAddComponent<MeshFilter>();
-        m_MeshRenderer = gameObject.SafeAddComponent<MeshRenderer>();
     }
 }
 

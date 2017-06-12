@@ -26,9 +26,4 @@ public class PoolObject : MonoBehaviour, IPool
     {
         throw new NotImplementedException();
     }
-
-    public virtual void Create()
-    {
-        throw new NotImplementedException();
-    }
 }

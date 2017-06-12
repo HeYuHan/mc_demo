@@ -12,8 +12,14 @@ public class GameObjectPool<T> where T:PoolObject
     int m_Count;
     string m_Name;
     bool m_Inited = false;
+    Func<T> m_CreateFunc = null;
+    public GameObjectPool(Func<T> create_func)
+    {
+        this.m_CreateFunc = create_func;
+    }
     public bool Init()
     {
+        if (m_CreateFunc == null) throw new Exception("m_CreateFunc == null");
         m_Inited = true;
         m_Name = typeof(T).ToString();
         m_Count = EXPAND_SIZE;
@@ -21,7 +27,7 @@ public class GameObjectPool<T> where T:PoolObject
         m_DataPosition = new int[m_Count];
         for(int i=0;i< m_Count;i++)
         {
-            m_Pool[i] = New();
+            m_Pool[i] = m_CreateFunc();
             m_Pool[i].SetPoolPosition(i);
             m_DataPosition[i] = i+1;
         }
@@ -29,14 +35,6 @@ public class GameObjectPool<T> where T:PoolObject
         return true;
     }
     
-    private T New()
-    {
-        GameObject go = new GameObject(m_Name);
-        T t = go.SafeAddComponent<T>();
-        t.Create();
-        go.SetActive(false);
-        return t;
-    }
     public void Push(T o)
     {
         m_DataPosition[o.GetPoolPosition()] = m_EmptyObject.GetPoolPosition();
@@ -61,7 +59,7 @@ public class GameObjectPool<T> where T:PoolObject
             Array.Copy(m_DataPosition, new_Position, m_Count);
             for (int i = m_Count; i < EXPAND_SIZE + m_Count; i++)
             {
-                new_Pool[i] = New();
+                new_Pool[i] = m_CreateFunc();
                 new_Pool[i].SetPoolPosition(i);
                 new_Position[i] = i + 1;
             }

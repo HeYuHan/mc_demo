@@ -12,6 +12,10 @@ public enum ShapeMeshType
 {
     NONE=0,CBUE,PLANE
 }
+public enum ShapeUVType
+{
+    NONE = 0, ONE_TEX, TWO_TEX,THREE_TEX
+}
 [Serializable]
 public class ShapeRenderInfo:ShapeInfo
 {

@@ -83,6 +83,7 @@
     <Compile Include="Assets\Script\Block\MapBlock.cs" />
     <Compile Include="Assets\Script\Block\Shape.cs" />
     <Compile Include="Assets\Script\Block\ShapeInfo.cs" />
+    <Compile Include="Assets\Script\Block\ShapeMaterial.cs" />
     <Compile Include="Assets\Script\Block\ShapeRenderInfo.cs" />
     <Compile Include="Assets\Script\Block\WorldMap.cs" />
     <Compile Include="Assets\Script\Common\BaseObject.cs" />

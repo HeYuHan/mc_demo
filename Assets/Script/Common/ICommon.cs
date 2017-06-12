@@ -11,12 +11,15 @@ public interface IPool
     void SetPoolPosition(int position);
     void Reset();
     void Recycle();
-    void Create();
 }
 [Serializable]
 public struct ShapeIndex
 {
     public int x, y, z;
+    public static implicit operator Vector3(ShapeIndex index)
+    {
+        return new Vector3(index.x, index.y, index.z);
+    }
 }
 
 public static class Common
